@@ -1,4 +1,4 @@
-# FinanzasInk - Control de Gastos con Escritura a Mano
+# Ink Business - Control de Gastos con Escritura a Mano
 
 Aplicacion de finanzas personales que permite registrar ingresos y gastos mediante escritura a mano o formulario tradicional, con reconocimiento de texto y reportes estadisticos.
 

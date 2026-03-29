@@ -48,7 +48,7 @@ Aplicacion de finanzas personales que permite registrar ingresos y gastos median
 ```bash
 # Clonar repositorio
 git clone <repo-url>
-cd ink-ai-hack-playground
+cd ink-business
 
 # Instalar dependencias
 npm install

@@ -56,6 +56,7 @@ export function ManualTransactionForm({ onSubmit, onCancel }: ManualTransactionF
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
+      maxHeight: '85vh',
       backgroundColor: '#fafafa',
     }}>
       {/* Header */}
@@ -110,7 +111,15 @@ export function ManualTransactionForm({ onSubmit, onCancel }: ManualTransactionF
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
+      <form onSubmit={handleSubmit} style={{
+        flex: 1,
+        padding: '20px',
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        WebkitOverflowScrolling: 'touch',
+        scrollbarWidth: 'thin',
+        scrollbarColor: '#cbd5e1 transparent',
+      }}>
         {/* Type selector */}
         <div style={{ marginBottom: '24px' }}>
           <label style={{
@@ -356,34 +365,36 @@ export function ManualTransactionForm({ onSubmit, onCancel }: ManualTransactionF
         )}
 
         {/* Submit */}
-        <button
-          type="submit"
-          style={{
-            width: '100%',
-            padding: '16px',
-            border: 'none',
-            borderRadius: '14px',
-            background: type === 'income'
-              ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-              : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-            color: 'white',
-            fontSize: '16px',
-            fontWeight: '700',
-            cursor: 'pointer',
-            boxShadow: type === 'income'
-              ? '0 8px 24px rgba(34, 197, 94, 0.4)'
-              : '0 8px 24px rgba(239, 68, 68, 0.4)',
-            transition: 'transform 0.2s, box-shadow 0.2s',
-          }}
-          onMouseOver={(e) => {
-            e.currentTarget.style.transform = 'translateY(-2px)';
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.transform = 'translateY(0)';
-          }}
-        >
-          Guardar {type === 'income' ? 'Ingreso' : 'Gasto'}
-        </button>
+        <div style={{ paddingBottom: '20px' }}>
+          <button
+            type="submit"
+            style={{
+              width: '100%',
+              padding: '16px',
+              border: 'none',
+              borderRadius: '14px',
+              background: type === 'income'
+                ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
+                : 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              color: 'white',
+              fontSize: '16px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              boxShadow: type === 'income'
+                ? '0 8px 24px rgba(34, 197, 94, 0.4)'
+                : '0 8px 24px rgba(239, 68, 68, 0.4)',
+              transition: 'transform 0.2s, box-shadow 0.2s',
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'translateY(-2px)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            Guardar {type === 'income' ? 'Ingreso' : 'Gasto'}
+          </button>
+        </div>
       </form>
     </div>
   );

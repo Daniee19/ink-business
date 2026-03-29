@@ -181,7 +181,7 @@ export function InkTransactionCapture({ onTransactionComplete, onCancel }: InkTr
 
     recognitionTimeout.current = window.setTimeout(() => {
       processCurrentPhase([...currentStrokes, newStroke]);
-    }, 800);
+    }, 1500);
   }, [currentStrokes]);
 
   // Try to recognize text - use Gemini directly (more reliable)

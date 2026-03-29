@@ -1,4 +1,5 @@
 // Arrow detection for income (up) and expense (down) gestures
+// VERY TOLERANT VERSION - optimized for quick gesture recognition
 
 import type { Stroke } from '../types/brush';
 import type { Offset, BoundingBox } from '../types/primitives';
@@ -26,65 +27,80 @@ function extractPoints(strokes: Stroke[]): Offset[] {
 }
 
 /**
- * Calculate the primary direction of a set of points.
- * Returns the angle in radians and the dominant direction.
+ * Calculate the primary direction using multiple methods for robustness.
+ * Analyzes start-to-end direction, overall trajectory, and dominant movement.
  */
-function calculatePrimaryDirection(points: Offset[]): { angle: number; isVertical: boolean; goesUp: boolean } {
-  if (points.length < 2) {
-    return { angle: 0, isVertical: false, goesUp: false };
+function calculateDirection(points: Offset[]): { goesUp: boolean; confidence: number } {
+  if (points.length < 3) {
+    return { goesUp: false, confidence: 0 };
   }
 
   const first = points[0];
   const last = points[points.length - 1];
 
-  const dx = last.x - first.x;
-  const dy = last.y - first.y;
-  const angle = Math.atan2(dy, dx);
+  // Method 1: Simple start-to-end
+  const totalDy = last.y - first.y;
+  const totalDx = Math.abs(last.x - first.x);
+  const totalDyAbs = Math.abs(totalDy);
 
-  // Check if primarily vertical (within 45 degrees of vertical)
-  const isVertical = Math.abs(Math.abs(angle) - Math.PI / 2) < Math.PI / 4;
-  const goesUp = dy < 0; // In screen coordinates, negative Y is up
+  // Method 2: Average direction over segments
+  let upSegments = 0;
+  let downSegments = 0;
+  const sampleRate = Math.max(1, Math.floor(points.length / 10));
 
-  return { angle, isVertical, goesUp };
+  for (let i = sampleRate; i < points.length; i += sampleRate) {
+    const dy = points[i].y - points[i - sampleRate].y;
+    if (dy < -2) upSegments++;
+    else if (dy > 2) downSegments++;
+  }
+
+  // Method 3: Compare first quarter to last quarter
+  const quarterLen = Math.floor(points.length / 4);
+  const firstQuarter = points.slice(0, Math.max(1, quarterLen));
+  const lastQuarter = points.slice(-Math.max(1, quarterLen));
+
+  const firstAvgY = firstQuarter.reduce((sum, p) => sum + p.y, 0) / firstQuarter.length;
+  const lastAvgY = lastQuarter.reduce((sum, p) => sum + p.y, 0) / lastQuarter.length;
+  const quarterDy = lastAvgY - firstAvgY;
+
+  // Combine methods to determine direction
+  const startEndUp = totalDy < 0;
+  const segmentsUp = upSegments > downSegments;
+  const quarterUp = quarterDy < 0;
+
+  // Count votes
+  const upVotes = (startEndUp ? 1 : 0) + (segmentsUp ? 1 : 0) + (quarterUp ? 1 : 0);
+  const goesUp = upVotes >= 2; // Majority vote
+
+  // Calculate confidence based on how vertical the movement is
+  const verticalRatio = totalDyAbs / (totalDx + 1);
+  let confidence = 0.5;
+
+  // More vertical = more confident
+  if (verticalRatio > 0.3) confidence += 0.15;
+  if (verticalRatio > 0.5) confidence += 0.1;
+  if (verticalRatio > 1.0) confidence += 0.1;
+  if (verticalRatio > 2.0) confidence += 0.1;
+
+  // Unanimous votes = more confident
+  if (upVotes === 3 || upVotes === 0) confidence += 0.1;
+
+  // Sufficient vertical movement = more confident
+  if (totalDyAbs > 30) confidence += 0.1;
+  if (totalDyAbs > 60) confidence += 0.1;
+
+  return { goesUp, confidence: Math.min(0.95, confidence) };
 }
 
 /**
- * Check if the stroke has an arrowhead shape at the tip.
- * Looks for a V-shape pattern at the end of the stroke.
- */
-function hasArrowhead(points: Offset[], direction: 'up' | 'down'): boolean {
-  if (points.length < 10) return false;
-
-  // Look at the last 30% of points for the arrowhead
-  const tipStartIndex = Math.floor(points.length * 0.7);
-  const tipPoints = points.slice(tipStartIndex);
-
-  if (tipPoints.length < 3) return false;
-
-  // Find the bounding box of the tip
-  const tipBBox = boundingBoxFromOffsets(tipPoints);
-  if (!tipBBox) return false;
-
-  // Check if the tip widens (arrowhead characteristic)
-  const tipWidth = tipBBox.right - tipBBox.left;
-  const tipHeight = Math.abs(tipBBox.bottom - tipBBox.top);
-
-  // For vertical arrows, the tip should be wider than it is tall (arrowhead shape)
-  // But we also accept a reasonable ratio for hand-drawn arrows
-  const aspectRatio = tipWidth / (tipHeight + 1);
-
-  // An arrowhead typically has width >= 0.5 * height
-  return aspectRatio >= 0.3;
-}
-
-/**
- * Analyze stroke patterns to detect if it forms an arrow shape.
- * This handles both single-stroke arrows and multi-stroke arrows.
+ * Simplified arrow pattern analysis.
+ * Much more tolerant - just needs some vertical movement.
  */
 function analyzeArrowPattern(strokes: Stroke[]): ArrowDetectionResult {
   const allPoints = extractPoints(strokes);
 
-  if (allPoints.length < 5) {
+  // Very low minimum points requirement
+  if (allPoints.length < 3) {
     return { direction: null, confidence: 0, boundingBox: null };
   }
 
@@ -96,73 +112,45 @@ function analyzeArrowPattern(strokes: Stroke[]): ArrowDetectionResult {
   const width = bbox.right - bbox.left;
   const height = bbox.bottom - bbox.top;
 
-  // Arrows should be taller than wide (vertical orientation)
-  const aspectRatio = height / (width + 1);
-  if (aspectRatio < 1.2) {
+  // Just need SOME vertical component - very tolerant
+  // Only reject if it's clearly horizontal (width > height * 3)
+  if (width > height * 3 && height < 20) {
     return { direction: null, confidence: 0, boundingBox: bbox };
   }
 
-  // For single stroke: check direction and look for arrowhead pattern
-  if (strokes.length === 1) {
-    const { isVertical, goesUp } = calculatePrimaryDirection(allPoints);
+  // Get direction from the stroke(s)
+  const { goesUp, confidence } = calculateDirection(allPoints);
 
-    if (!isVertical) {
-      return { direction: null, confidence: 0, boundingBox: bbox };
-    }
-
-    const direction: ArrowDirection = goesUp ? 'up' : 'down';
-
-    // Check for arrowhead
-    const hasHead = hasArrowhead(allPoints, direction);
-
-    // Calculate confidence based on verticality and aspect ratio
-    const verticalityScore = aspectRatio / 3; // Higher is more vertical
-    const confidence = Math.min(0.9, 0.5 + (hasHead ? 0.3 : 0) + Math.min(0.2, verticalityScore * 0.1));
-
-    return { direction, confidence, boundingBox: bbox };
+  // Minimum height for a valid arrow gesture
+  if (height < 15) {
+    return { direction: null, confidence: 0, boundingBox: bbox };
   }
 
-  // For multi-stroke (2-3 strokes): look for stem + arrowhead pattern
-  if (strokes.length >= 2 && strokes.length <= 3) {
-    // Find the longest stroke (likely the stem)
-    let longestStrokeIndex = 0;
-    let maxLength = 0;
+  const direction: ArrowDirection = goesUp ? 'up' : 'down';
 
-    strokes.forEach((stroke, index) => {
-      const length = stroke.inputs.inputs.length;
-      if (length > maxLength) {
-        maxLength = length;
-        longestStrokeIndex = index;
-      }
-    });
+  // Boost confidence for more vertical strokes
+  const aspectRatio = height / (width + 1);
+  let finalConfidence = confidence;
+  if (aspectRatio > 1) finalConfidence += 0.05;
+  if (aspectRatio > 2) finalConfidence += 0.05;
 
-    const stemPoints = strokes[longestStrokeIndex].inputs.inputs.map(p => ({ x: p.x, y: p.y }));
-    const { isVertical, goesUp } = calculatePrimaryDirection(stemPoints);
-
-    if (!isVertical) {
-      return { direction: null, confidence: 0, boundingBox: bbox };
-    }
-
-    const direction: ArrowDirection = goesUp ? 'up' : 'down';
-
-    // Multi-stroke arrows get higher confidence since they're more intentional
-    const confidence = 0.85;
-
-    return { direction, confidence, boundingBox: bbox };
-  }
-
-  return { direction: null, confidence: 0, boundingBox: bbox };
+  return {
+    direction,
+    confidence: Math.min(0.95, finalConfidence),
+    boundingBox: bbox
+  };
 }
 
 /**
  * Detect if strokes form an arrow pointing up or down.
+ * Very tolerant detection - optimized for quick gestures.
  *
  * @param strokes The strokes to analyze
- * @param minConfidence Minimum confidence threshold (default: 0.6)
+ * @param minConfidence Minimum confidence threshold (default: 0.35 - very low for maximum tolerance)
  * @returns The detected arrow direction or null if no arrow detected
  */
-export function detectArrow(strokes: Stroke[], minConfidence: number = 0.6): ArrowDetectionResult {
-  if (strokes.length === 0 || strokes.length > 3) {
+export function detectArrow(strokes: Stroke[], minConfidence: number = 0.35): ArrowDetectionResult {
+  if (strokes.length === 0 || strokes.length > 5) {
     return { direction: null, confidence: 0, boundingBox: null };
   }
 
@@ -177,11 +165,11 @@ export function detectArrow(strokes: Stroke[], minConfidence: number = 0.6): Arr
 
 /**
  * Check if a single stroke could be an arrow based on quick heuristics.
- * This is used for early detection before full analysis.
+ * Very tolerant - just needs some vertical movement.
  */
 export function isLikelyArrowStroke(stroke: Stroke): boolean {
   const points = stroke.inputs.inputs;
-  if (points.length < 10) return false;
+  if (points.length < 3) return false;
 
   const first = points[0];
   const last = points[points.length - 1];
@@ -189,6 +177,7 @@ export function isLikelyArrowStroke(stroke: Stroke): boolean {
   const dx = Math.abs(last.x - first.x);
   const dy = Math.abs(last.y - first.y);
 
-  // Must be primarily vertical (dy > dx * 1.5)
-  return dy > dx * 1.5 && dy > 50; // At least 50px vertical movement
+  // Very tolerant: just needs dy > dx * 0.5 and some minimum movement
+  // This accepts almost any stroke that goes more up/down than sideways
+  return dy > dx * 0.5 && dy > 20;
 }

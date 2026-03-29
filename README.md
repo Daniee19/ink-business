@@ -1,142 +1,133 @@
-# Ink Business - Control de Gastos con Escritura a Mano
+# 🚀 Ink Business  
+### Finanzas personales con escritura natural ✍️
 
-Aplicacion de finanzas personales que permite registrar ingresos y gastos mediante escritura a mano o formulario tradicional, con reconocimiento de texto y reportes estadisticos.
+Ink Business es una aplicación de finanzas personales que transforma la forma tradicional de registrar ingresos y gastos.
 
-![Finance App](https://img.shields.io/badge/React-18-blue) ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue) ![Vite](https://img.shields.io/badge/Vite-7-purple)
+En lugar de formularios aburridos, puedes escribir como en papel:
+- Dibujas una flecha ↑ para ingresos  
+- Dibujas una flecha ↓ para gastos  
+- Escribes el resto… como si fuera un cuaderno  
 
-## Caracteristicas Principales
-
-### Registro con Escritura a Mano (Ink Mode)
-- Dibuja una **flecha hacia arriba** para registrar un ingreso
-- Dibuja una **flecha hacia abajo** para registrar un gasto
-- Escribe el titulo, monto y descripcion a mano
-- Reconocimiento automatico de texto usando Vision AI
-
-### Registro Manual
-- Formulario intuitivo con selector de tipo (Ingreso/Gasto)
-- Categorias predefinidas con iconos visuales
-- Validacion en tiempo real
-
-### Categorias Disponibles
-
-**Ingresos:**
-- Salario, Freelance, Inversiones, Ventas, Regalo, Otros
-
-**Gastos:**
-- Comida, Transporte, Entretenimiento, Compras, Servicios, Salud, Educacion, Hogar, Otros
-
-### Reportes y Estadisticas
-- Balance mensual en tiempo real
-- Graficos de gastos por categoria (Doughnut)
-- Graficos de ingresos por categoria
-- Tendencia diaria de movimientos (Barras)
-- Resumen de totales
-
-### Almacenamiento
-- Datos guardados localmente en el navegador (localStorage)
-- Sin necesidad de cuenta o servidor externo
-- Privacidad total de tus datos financieros
-
-## Instalacion
-
-### Requisitos
-- Node.js v18+
-- npm
-
-### Pasos
-
-```bash
-# Clonar repositorio
-git clone <repo-url>
-cd ink-business
-
-# Instalar dependencias
-npm install
-
-# Configurar variables de entorno
-cp .env.example .env
-```
-
-### Variables de Entorno
-
-| Variable | Descripcion | Requerido |
-|----------|-------------|-----------|
-| `INK_OPENROUTER_API_KEY` | API key de OpenRouter para reconocimiento de texto | Si (para modo Ink) |
-| `INK_RECOGNITION_API_URL` | URL del servicio de reconocimiento | Opcional |
-
-Obtener API key en: [OpenRouter](https://openrouter.ai/)
-
-### Ejecutar
-
-```bash
-# Desarrollo
-npm run dev
-
-# Produccion
-npm run build
-npm run preview
-```
-
-Acceder a la app de finanzas: `http://localhost:5173/#finance`
-
-## Uso
-
-### Modo Ink (Escritura a Mano)
-
-1. Presiona el boton **+** central o "Escribir"
-2. Dibuja una flecha:
-   - **Arriba** = Ingreso
-   - **Abajo** = Gasto
-3. Escribe el titulo del movimiento
-4. Escribe el monto (numero)
-5. Escribe una descripcion (opcional, puedes omitir)
-6. Selecciona una categoria
-
-### Modo Manual
-
-1. Presiona "Manual" en acciones rapidas o el icono de lapiz
-2. Selecciona tipo: Ingreso o Gasto
-3. Ingresa el monto
-4. Escribe la descripcion
-5. Selecciona categoria
-6. Guarda
-
-### Ver Reportes
-
-1. Navega a "Reportes" en la barra inferior
-2. Visualiza:
-   - Resumen de ingresos, gastos y balance
-   - Grafico de movimientos diarios
-   - Distribucion por categorias
-
-## Tecnologias
-
-- **Frontend:** React 18, TypeScript, Vite
-- **Graficos:** Chart.js, react-chartjs-2
-- **Reconocimiento:** OpenRouter API (Gemini Vision)
-- **Almacenamiento:** localStorage
-- **Estilos:** CSS-in-JS con glassmorphism
-
-## Estructura del Proyecto
-
-```
-src/finance/
-├── FinanceApp.tsx          # Componente principal
-├── ManualTransactionForm.tsx   # Formulario manual
-├── InkTransactionCapture.tsx   # Captura con ink
-├── TransactionList.tsx     # Lista de transacciones
-├── FinanceReports.tsx      # Graficos y reportes
-├── arrowDetection.ts       # Deteccion de flechas
-├── GeminiTextRecognition.ts    # Reconocimiento de texto
-├── useFinanceData.ts       # Hook de estado
-├── storage.ts              # Persistencia localStorage
-└── types.ts                # Tipos TypeScript
-```
-
-## Licencia
-
-MIT
+Simple, rápido y natural.
 
 ---
 
-Desarrollado para Hackathon 2024
+## 🧠 Problema
+
+Muchas apps de finanzas:
+- Son lentas de usar  
+- Requieren demasiados pasos  
+- Rompen el flujo natural del usuario  
+
+Resultado: la gente deja de registrar sus gastos.
+
+---
+
+## 💡 Solución
+
+Ink Business convierte el registro financiero en algo tan natural como escribir en papel.
+
+- Sin fricción  
+- Sin formularios obligatorios  
+- Sin perder tiempo  
+
+Solo escribes y listo.
+
+---
+
+## ⚡ Características principales
+
+### ✍️ Ink Mode (Modo escritura)
+- Dibuja una flecha hacia arriba (↑) → ingreso  
+- Dibuja una flecha hacia abajo (↓) → gasto  
+- Escribe:
+  - Título  
+  - Monto  
+  - Descripción  
+
+El sistema interpreta automáticamente lo que escribes.
+
+---
+
+### 🧾 Registro híbrido
+- Escritura a mano + estructura digital  
+- Experiencia tipo notebook inteligente  
+
+---
+
+### 📊 Reportes visuales
+- Balance en tiempo real  
+- Gráficos por categorías  
+- Tendencias de ingresos y gastos  
+
+---
+
+### 🔒 Privacidad
+- Datos almacenados localmente  
+- No requiere cuenta  
+- Sin backend obligatorio  
+
+---
+
+## 🧪 ¿Cómo se usa?
+
+1. Abres la app  
+2. Presionas “Escribir”  
+3. Dibujas:
+   - ↑ ingreso  
+   - ↓ gasto  
+4. Escribes los detalles a mano  
+5. El sistema lo procesa automáticamente  
+
+En menos de 5 segundos registras un movimiento.
+
+---
+
+## 🛠️ Tecnologías
+
+- Frontend: React + TypeScript + Vite  
+- Reconocimiento: OCR + Vision AI  
+- Gráficos: Chart.js  
+- Persistencia: localStorage  
+- UX: mobile-first + escritura natural  
+
+---
+
+## ⚙️ Instalación
+
+git clone <repo-url>
+cd ink-business
+npm install
+npm run dev
+
+---
+
+## 🌎 Hackathon
+
+Proyecto desarrollado para Sundai Latam Hackathon  
+Duración: 7 horas  
+
+Enfocado en:
+- Innovación en UX  
+- Interacción natural  
+- Reducción de fricción  
+
+---
+
+## 🧭 Futuro
+
+- Mejor reconocimiento de escritura  
+- Sincronización en la nube  
+- Exportación de reportes  
+- IA para insights financieros  
+
+---
+
+## 🏁 Conclusión
+
+Ink Business no es otra app de finanzas.
+
+Es una nueva forma de interactuar con tu dinero:
+- Más humana  
+- Más rápida  
+- Más natural  

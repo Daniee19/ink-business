@@ -2,6 +2,23 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+<<<<<<< HEAD
+## Repository Structure
+
+All application code lives in the `ink-business/` subdirectory (which has its own detailed CLAUDE.md). The outer repo is a wrapper.
+
+Run all commands from inside `ink-business/`:
+
+```bash
+cd ink-business
+npm install
+npm run dev       # Dev server at http://localhost:5173
+npm run build     # Production build
+npm run lint      # ESLint
+```
+
+See `ink-business/CLAUDE.md` for full architecture, patterns, and conventions.
+=======
 ## Project Overview
 
 Ink Playground is a React + TypeScript + Vite web app for rapid prototyping of interactive ink-based elements. It renders, edits, and recognizes handwritten content.
@@ -81,3 +98,4 @@ Core immutable, JSON-serializable interfaces:
 - `Element` is a union type defined in `src/types/elements.ts` — add new element types there (1 line)
 - Only StrokeElement has no transform; others have position/rotation/scale via `transform` matrix
 - `NoteElements` is the container with `elements: Element[]`
+>>>>>>> 122b8e4e91858630c857c32c7a5a8a6e739eb17e

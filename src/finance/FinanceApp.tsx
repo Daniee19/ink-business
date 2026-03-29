@@ -461,7 +461,7 @@ export function FinanceApp() {
               color: 'white',
               letterSpacing: '-0.5px',
             }}>
-              Mis Finanzas
+              Ink Business
             </h1>
           </div>
           <div style={{
